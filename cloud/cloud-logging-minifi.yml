@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: horus-service
+  labels:
+    app: horus-service
+spec:
+  selector:
+    app: horus-minifi
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: minifi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: horus-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: horus-minifi
+  template:
+    metadata:
+      labels:
+        app: horus-minifi
+    spec:
+      volumes:
+        - name: minifi-volume
+          configMap:
+            name: minifi-configmap
+      containers:
+      - name: minifi
+        # Image defined by user or managed by horus contrinbuters
+        image: horus/nifi-minifi
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: minifi-volume
+          mountPath: /opt/minifi/current/conf/config.yml
+          subPath: config.yml
+        - name: minifi-volume
+          mountPath: /opt/minifi/current/conf/bootstrap.conf
+          subPath: bootstrap.conf
