@@ -1,8 +1,9 @@
-```bash
-docker build --tag python-docker .
-docker images
-```
+Prerequisites
+- install [minikube](https://minikube.sigs.k8s.io/docs/start/)
+- install [docker](https://hub.docker.com/search?q=&type=edition&offering=community&sort=updated_at&order=desc)
 
 ```bash
-kubectl create configmap game-config-2 --from-file=fluent-bit.conf
+eval $(minikube docker-env)
+docker build --tag chatty-app .
+docker images
 ```

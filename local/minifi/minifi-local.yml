@@ -1,0 +1,171 @@
+MiNiFi Config Version: 3
+Flow Controller:
+  name: local-setup
+  comment: ''
+Core Properties:
+  flow controller graceful shutdown period: 10 sec
+  flow service write delay interval: 500 ms
+  administrative yield duration: 30 sec
+  bored yield duration: 10 millis
+  max concurrent threads: 1
+  variable registry properties: ''
+FlowFile Repository:
+  partitions: 256
+  checkpoint interval: 2 mins
+  always sync: false
+  Swap:
+    threshold: 20000
+    in period: 5 sec
+    in threads: 1
+    out period: 5 sec
+    out threads: 4
+Content Repository:
+  implementation: org.apache.nifi.controller.repository.FileSystemRepository
+  content claim max appendable size: 10 MB
+  content claim max flow files: 100
+  content repository archive enabled: false
+  content repository archive max retention period: 12 hours
+  content repository archive max usage percentage: 50%
+  always sync: false
+Provenance Repository:
+  provenance rollover time: 1 min
+  implementation: org.apache.nifi.provenance.WriteAheadProvenanceRepository
+  provenance index shard size: 500 MB
+  provenance max storage size: 1 GB
+  provenance max storage time: 24 hours
+  provenance buffer size: 10000
+Component Status Repository:
+  buffer size: 1440
+  snapshot frequency: 1 min
+Security Properties:
+  keystore: ''
+  keystore type: ''
+  keystore password: ''
+  key password: ''
+  truststore: ''
+  truststore type: ''
+  truststore password: ''
+  ssl protocol: ''
+  Sensitive Props:
+    key: gAHRSHkEd0lN7Vy1SW20sgZhsNjyGSWx
+    algorithm: PBEWITHMD5AND256BITAES-CBC-OPENSSL
+    provider: BC
+Processors:
+- id: 4933996e-f262-3afa-0000-000000000000
+  name: ConsumeWindowsEventLog
+  class: org.apache.nifi.processors.windows.event.log.ConsumeWindowsEventLog
+  max concurrent tasks: 1
+  scheduling strategy: TIMER_DRIVEN
+  scheduling period: 0 sec
+  penalization period: 30 sec
+  yield period: 1 sec
+  run duration nanos: 0
+  auto-terminated relationships list: []
+  Properties:
+    channel: Application
+    inactiveDurationToReconnect: 10 mins
+    maxBuffer: '1048576'
+    maxQueue: '1024'
+    query: |-
+      <QueryList>
+        <Query Id="0" Path="Application">
+          <Select Path="Application">*</Select>
+        </Query>
+      </QueryList>
+- id: ffaea6de-2e7c-3964-0000-000000000000
+  name: PutElasticsearch
+  class: org.apache.nifi.processors.elasticsearch.PutElasticsearch
+  max concurrent tasks: 1
+  scheduling strategy: TIMER_DRIVEN
+  scheduling period: 0 sec
+  penalization period: 30 sec
+  yield period: 1 sec
+  run duration nanos: 0
+  auto-terminated relationships list: []
+  Properties:
+    Batch Size: '100'
+    Character Set: UTF-8
+    Cluster Name: elasticsearch
+    ElasticSearch Hosts:
+    ElasticSearch Ping Timeout: 5s
+    Identifier Attribute:
+    Index:
+    Index Operation: index
+    Password:
+    SSL Context Service:
+    Sampler Interval: 5s
+    Shield Plugin Filename:
+    Type:
+    Username:
+- id: a6cc363f-e088-3e94-0000-000000000000
+  name: PutTCP
+  class: org.apache.nifi.processors.standard.PutTCP
+  max concurrent tasks: 1
+  scheduling strategy: TIMER_DRIVEN
+  scheduling period: 0 sec
+  penalization period: 30 sec
+  yield period: 1 sec
+  run duration nanos: 0
+  auto-terminated relationships list:
+  - failure
+  - success
+  Properties:
+    Character Set: UTF-8
+    Connection Per FlowFile: 'false'
+    Hostname: localhost
+    Idle Connection Expiration: 5 seconds
+    Max Size of Socket Send Buffer: 1 MB
+    Outgoing Message Delimiter:
+    Port: '8514'
+    SSL Context Service:
+    Timeout: 10 seconds
+- id: 3ece5573-f82e-3f5f-0000-000000000000
+  name: TailFile
+  class: org.apache.nifi.processors.standard.TailFile
+  max concurrent tasks: 1
+  scheduling strategy: TIMER_DRIVEN
+  scheduling period: 0 sec
+  penalization period: 30 sec
+  yield period: 1 sec
+  run duration nanos: 0
+  auto-terminated relationships list: []
+  Properties:
+    File Location: Local
+    File to Tail: C:\\logs\\log-file.log
+    Initial Start Position: Beginning of File
+    Post-Rollover Tail Period: 0 sec
+    Rolling Filename Pattern:
+    reread-on-nul: 'false'
+    tail-base-directory:
+    tail-mode: Single file
+    tailfile-lookup-frequency: 10 minutes
+    tailfile-maximum-age: 24 hours
+    tailfile-recursive-lookup: 'false'
+Controller Services: []
+Process Groups: []
+Input Ports: []
+Output Ports: []
+Funnels: []
+Connections:
+- id: e7bee299-ce60-3591-0000-000000000000
+  name: ConsumeWindowsEventLog/success/PutTCP
+  source id: 4933996e-f262-3afa-0000-000000000000
+  source relationship names:
+  - success
+  destination id: a6cc363f-e088-3e94-0000-000000000000
+  max work queue size: 10000
+  max work queue data size: 1 GB
+  flowfile expiration: 0 sec
+  queue prioritizer class: ''
+- id: b1d11f20-c37d-365e-0000-000000000000
+  name: TailFile/success/PutTCP
+  source id: 3ece5573-f82e-3f5f-0000-000000000000
+  source relationship names:
+  - success
+  destination id: a6cc363f-e088-3e94-0000-000000000000
+  max work queue size: 10000
+  max work queue data size: 1 GB
+  flowfile expiration: 0 sec
+  queue prioritizer class: ''
+Remote Process Groups: []
+NiFi Properties Overrides: {}

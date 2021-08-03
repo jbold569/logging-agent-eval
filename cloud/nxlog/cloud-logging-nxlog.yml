@@ -6,20 +6,21 @@ spec:
   containers:
   - name: chatty-app
     image: chatty-app
-    imagePullPolicy: Never
+    imagePullPolicy: Never      
     volumeMounts:
     - name: varlog
       mountPath: /var/log
-  - name: fluent-bit
-    image: fluent/fluent-bit
+  - name: nxlog-ce
+    image: nxlog/nxlog-ce
+    args: ["-c", "/etc/nxlog/nxlog.conf"]
     volumeMounts:
     - name: varlog
       mountPath: /var/log
     - name: config
-      mountPath: /fluent-bit/etc
+      mountPath: /etc/nxlog
   volumes:
   - name: varlog
     emptyDir: {}
   - name: config
     configMap:
-      name: fluentbit-configmap
+      name: nxlog-configmap
